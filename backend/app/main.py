@@ -384,24 +384,22 @@ async def export_eda_pdf(dataset_id: str):
 
 @app.get("/download/{session_id}")
 async def download_file(session_id: str):
-    csv_path = os.path.join(TEMP_DIR, f"{session_id}.csv")
-    excel_path = os.path.join(TEMP_DIR, f"{session_id}.xlsx")
-    
+    csv_path = f"/tmp/{session_id}.csv"
+    excel_path = f"/tmp/{session_id}.xlsx"
+
     if not os.path.exists(csv_path):
         raise HTTPException(status_code=404, detail="Dataset not found")
-    
-    # 1. CSV read karke Excel (.xlsx) file create karo
+
     df = pd.read_csv(csv_path)
-    
-    # Simple formatting: index=False karke properly structured sheet banao
-    with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Cleaned_Data')
-    
-    # 2. Return proper Excel FileResponse
+
+    writer = pd.ExcelWriter(excel_path, engine='openpyxl')
+    df.to_excel(writer, index=False, sheet_name='Cleaned_Data')
+    writer.close()
+
     return FileResponse(
-        path=excel_path, 
-        filename=f"Cleaned_Dataset_{session_id[:6]}.xlsx", 
-        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        path=excel_path,
+        filename=f"Cleaned_Dataset_{session_id[:6]}.xlsx",
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
 if __name__ == "__main__":
