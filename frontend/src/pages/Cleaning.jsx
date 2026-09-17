@@ -113,6 +113,17 @@ export default function Cleaning() {
     );
   }
 
+  const handleDownload = () => {
+  const sessionId = localStorage.getItem('active_session_id');
+  if (!sessionId) {
+    alert("No active session found. Please upload a file first.");
+    return;
+  }
+  
+  // Directly opens the download link in a new tab/window to download .xlsx
+  window.open(`${import.meta.env.VITE_API_BASE_URL}/download/${sessionId}`, '_blank');
+};
+
   const items = cleaningPlan?.items || [];
 
   return (
